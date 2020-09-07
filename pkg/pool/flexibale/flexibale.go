@@ -82,13 +82,15 @@ func (p *poolImpl) Put(ctx context.Context, task pool.Task) {
 			return task(ctx)
 		}
 	}
-	select {
-	case p.tasks <- t:
-		return
-	default:
-		numWorkers := atomic.AddInt64(&p.numWorkers, 1)
-		if numWorkers <= int64(p.MaxWorkers) {
-			go p.workerFn()
+	if p.numWorkers < int64(p.MaxWorkers) {
+		select {
+		case p.tasks <- t:
+			return
+		default:
+			numWorkers := atomic.AddInt64(&p.numWorkers, 1)
+			if numWorkers <= int64(p.MaxWorkers) {
+				go p.workerFn()
+			}
 		}
 	}
 
