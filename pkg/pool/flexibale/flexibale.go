@@ -25,7 +25,7 @@ func New(cfg *Config) pool.Pool {
 	return &poolImpl{
 		Config:  cfg,
 		tasks:   make(chan func() error),
-		errors:  make(chan error, cfg.MaxWorkers),
+		errors:  make(chan error, 1),
 		barrier: make(chan struct{}),
 	}
 }
@@ -62,7 +62,11 @@ func (p *poolImpl) workerFn() {
 	for t := range p.tasks {
 		err := t()
 		if err != nil {
-			p.errors <- err
+			select {
+			case p.errors <- err:
+				p.errors <- err
+			default:
+			}
 		}
 		p.wg.Done()
 	}
