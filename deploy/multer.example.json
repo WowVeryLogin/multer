@@ -1,0 +1,15 @@
+{
+    "http": {
+        "max_request": 100,
+        "max_urls": 20,
+        "graceful_timeout": 10,
+        "timeout": 10,
+        "addr": ":8080",
+        "pool": {
+            "max_workers": 4
+        }
+    },
+    "client": {
+        "timeout": 1
+    }
+}
